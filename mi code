@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiniela Mundial 2026</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #0f172a, #1e2937); color: #e2e8f0; margin:0; padding:20px; }
+    h1, h2 { color: #22d3ee; text-align:center; }
+    .grupo { background:#1e2937; margin:20px 0; padding:20px; border-radius:16px; box-shadow:0 4px 15px rgba(0,0,0,0.3); }
+    .partido { display:flex; align-items:center; justify-content:center; gap:10px; margin:15px 0; background:#334155; padding:15px; border-radius:12px; flex-wrap:wrap; }
+    .equipo { font-weight:bold; min-width:110px; text-align:center; }
+    input { width:55px; text-align:center; background:#475569; color:white; border:none; border-radius:6px; padding:8px; font-size:16px; }
+    button { background:#22d3ee; color:#0f172a; border:none; padding:12px 20px; border-radius:8px; font-weight:bold; cursor:pointer; margin:5px; }
+    .tabla { margin-top:20px; overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { padding:10px; text-align:center; border-bottom:1px solid #475569; }
+    th { background:#22d3ee; color:#0f172a; }
+    .nav { text-align:center; margin:20px 0; }
+    .tab { display:none; }
+    .active { display:block; }
+  </style>
+</head>
+<body>
+  <h1>⚽ Quiniela Mundial 2026</h1>
+  <p style="text-align:center;">Llena tu quiniela • Comparte con tus amigos • ¡Compite!</p>
+
+  <div class="nav">
+    <button onclick="showTab(0)">Fase de Grupos</button>
+    <button onclick="showTab(1)">Tabla General</button>
+    <button onclick="showTab(2)">Goleadores</button>
+  </div>
+
+  <div id="tab0" class="tab active">
+    <div id="grupos"></div>
+  </div>
+
+  <div id="tab1" class="tab">
+    <h2>Clasificación de Participantes</h2>
+    <p>Comparte tu enlace y luego pega los enlaces de tus amigos aquí para ver la tabla general.</p>
+    <textarea id="enlacesAmigos" placeholder="Pega enlaces uno por línea" style="width:100%; height:150px;"></textarea>
+    <button onclick="calcularTablaGeneral()">Calcular Tabla General</button>
+    <div id="tablaGeneral"></div>
+  </div>
+
+  <div id="tab2" class="tab">
+    <h2>🏆 Goleadores</h2>
+    <div id="goleadores"></div>
+  </div>
+
+  <div style="text-align:center; margin:30px;">
+    <button onclick="compartirMiQuiniela()">🔗 Compartir mi Quiniela</button>
+    <button onclick="exportarPDF()">📄 Exportar como PDF</button>
+  </div>
+
+  <script>
+    // === DATOS REALES DEL MUNDIAL 2026 ===
+    const gruposData = {
+      "A": ["México", "Sudáfrica", "Corea del Sur", "República Checa"],
+      "B": ["Canadá", "Suiza", "Qatar", "Bosnia y Herzegovina"],
+      "C": ["Brasil", "Marruecos", "Haití", "Escocia"],
+      "D": ["Estados Unidos", "Paraguay", "Australia", "Turquía"],
+      "E": ["Alemania", "Curazao", "Costa de Marfil", "Ecuador"],
+      "F": ["Países Bajos", "Japón", "Túnez", "Suecia"],
+      "G": ["Bélgica", "Egipto", "Irán", "Nueva Zelanda"],
+      "H": ["España", "Cabo Verde", "Arabia Saudita", "Uruguay"]
+    };
+
+    let predicciones = JSON.parse(localStorage.getItem('quiniela2026')) || {};
+    let goleadores = JSON.parse(localStorage.getItem('goleadores2026')) || {};
+
+    // Aquí irán los partidos (puedes expandir con fechas reales)
+    const partidos = [
+      {id:1, grupo:"A", local:"México", vis:"Sudáfrica", fecha:"11 Jun"},
+      {id:2, grupo:"A", local:"Corea del Sur", vis:"República Checa", fecha:"11 Jun"},
+      // ... (puedes agregar los 48 partidos de grupos aquí)
+    ];
+
+    function renderGrupos() {
+      const cont = document.getElementById('grupos');
+      cont.innerHTML = '';
+
+      Object.keys(gruposData).forEach(grupo => {
+        let html = `<div class="grupo"><h2>Grupo ${grupo}</h2>`;
+        
+        // Tabla de posiciones
+        html += `<div class="tabla"><h3>Tabla Actual</h3><table><tr><th>Equipo</th><th>Pts</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th></tr>`;
+        gruposData[grupo].forEach(eq => {
+          html += `<tr><td>${eq}</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>`;
+        });
+        html += `</table></div>`;
+
+        // Partidos
+        html += `<h3>Predicciones</h3>`;
+        // Agregar partidos del grupo (simplificado por ahora)
+        html += `</div>`;
+        cont.innerHTML += html;
+      });
+    }
+
+    function compartirMiQuiniela() {
+      const data = btoa(JSON.stringify(predicciones));
+      const url = window.location.href.split('?')[0] + '?q=' + data;
+      navigator.clipboard.writeText(url);
+      alert("✅ ¡Enlace copiado! Envíalo a tus compañeros");
+    }
+
+    function showTab(n) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab'+n).classList.add('active');
+    }
+
+    window.onload = () => {
+      renderGrupos();
+      // Cargar desde enlace compartido
+      const params = new URLSearchParams(location.search);
+      if (params.get('q')) {
+        try {
+          predicciones = JSON.parse(atob(params.get('q')));
+        } catch(e){}
+      }
+    };
+  </script>
+</body>
+</html>
